@@ -1,9 +1,8 @@
-﻿namespace Lab2
+﻿namespace Lab2;
+
+public enum GameType
 {
-    public enum GameType
-    {
-        Standard,
-        Training,
-        SingleRating
-    }
+    Standard,
+    Training,
+    SingleRating
 }

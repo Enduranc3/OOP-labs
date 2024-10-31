@@ -8,8 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="GameProcessor.cs" />
-      <Compile Remove="GameEngine.cs" />
+        <Compile Remove="GameProcessor.cs"/>
     </ItemGroup>
 
 </Project>
