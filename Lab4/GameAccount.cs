@@ -14,11 +14,13 @@ public abstract class GameAccount(string userName, int currentRating)
     protected Dictionary<Guid, int> RatingHistory(IGameRepository gameRepository)
     {
         var dbContext = gameRepository.GetDbContext();
-        if (!dbContext.RatingHistories.ContainsKey(UserId))
+        if (dbContext.RatingHistories.TryGetValue(UserId, out var value))
         {
-            dbContext.RatingHistories[UserId] = new Dictionary<Guid, int>();
+            return value;
         }
-        return dbContext.RatingHistories[UserId];
+        value = [];
+        dbContext.RatingHistories[UserId] = value;
+        return value;
     }
 
     public virtual void WinGame(IGameRepository gameRepository, Game game)
@@ -64,6 +66,11 @@ public abstract class GameAccount(string userName, int currentRating)
     public virtual void PrintStats(PlayerService playerService, IGameAccountRepository repository,
         IGameRepository gameRepository)
     {
+        if (GameHistory(gameRepository).Count == 0)
+        {
+            throw new InvalidOperationException("No games played.");
+        }
+        
         Console.WriteLine(
             $"{"Game ID",-40}| {"1st player",-15}| {"2nd player",-15}| {"Rating change",-16}| {"Game type",-16}|");
 
@@ -202,13 +209,14 @@ public class StreakBonusGameAccount(string userName, int currentRating)
     private void UpdateWinStreak(IGameRepository gameRepository, Game game)
     {
         var ratingChange = RatingHistory(gameRepository)[game.GameId];
-        if (ratingChange > 0)
+        switch (ratingChange)
         {
-            WinStreak++;
-        }
-        else if (ratingChange < 0)
-        {
-            WinStreak = 0;
+            case > 0:
+                WinStreak++;
+                break;
+            case < 0:
+                WinStreak = 0;
+                break;
         }
 
         WinStreakHistory(gameRepository)[game.GameId] = WinStreak;
